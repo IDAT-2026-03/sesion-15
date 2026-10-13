@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sesión 15: Selectores Avanzados, Pseudo-elementos y Especificidad — IDAT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            idatYellow: '#FFC820',
+            idatDark: '#111827',
+            idatMuted: '#4B5563',
+            idatLight: '#F3F4F6'
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['Fira Code', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .slide-container {
+      perspective: 1000px;
+    }
+    .slide {
+      transition: all 0.4s ease-in-out;
+      opacity: 0;
+      transform: scale(0.99) translateY(4px);
+      display: none;
+    }
+    .slide.active {
+      display: flex;
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #1f2937;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #4b5563;
+      border-radius: 3px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #FFC820;
+    }
+
+    /* Estilos dinámicos para las demostraciones interactivas */
+    .demo-input-focus:focus {
+      outline: none;
+      border-color: #FFC820;
+      box-shadow: 0 0 0 3px rgba(255, 200, 32, 0.35);
+      background-color: #ffffff;
+    }
+
+    .demo-badge::before {
+      content: '★ ';
+      color: #FFC820;
+      font-weight: 900;
+    }
+    .demo-badge::after {
+      content: ' [NUEVO]';
+      font-size: 10px;
+      font-weight: 800;
+      color: #10b981;
+      letter-spacing: 0.05em;
+    }
+
+    .demo-ribbon {
+      position: relative;
+    }
+    .demo-ribbon::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 5px;
+      background: #FFC820;
+      border-radius: 4px 0 0 4px;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 text-idatDark font-sans h-screen flex flex-col justify-between overflow-hidden select-none">
+
+  <!-- Header Corporativo Superior (Altura Fija) -->
+  <header class="bg-idatDark text-white px-6 md:px-12 py-3 flex items-center justify-between border-b-4 border-idatYellow shadow-md h-[72px] flex-shrink-0">
+    <div class="flex items-center gap-3">
+      <div class="bg-idatYellow text-idatDark font-black px-3 py-1 rounded text-lg tracking-wider">IDAT</div>
+      <div class="h-6 w-[1px] bg-gray-600 hidden md:block"></div>
+      <div class="hidden md:block">
+        <span class="text-xs text-idatYellow font-bold tracking-widest block uppercase">Desarrollo Web: HTML & CSS</span>
+        <span class="text-sm font-semibold">Sesión 15: Pseudo-clases, Pseudo-elementos & Especificidad</span>
+      </div>
+    </div>
+    <div class="text-right text-xs md:text-sm font-medium text-gray-300">
+      Docente: <strong class="text-idatYellow">Ing. Jhon Chavez</strong>
+    </div>
+  </header>
+
+  <!-- Área Principal de Diapositivas -->
+  <main class="flex-1 p-4 md:p-6 overflow-hidden flex items-center justify-center">
+    <div class="w-full max-w-6xl h-full flex items-stretch justify-center slide-container">
+
+      <!-- ============================================== -->
+      <!-- DIAPOSITIVA 1: Portada (Sesión 15) -->
+      <!-- ============================================== -->
+      <div id="slide-1" class="slide active w-full bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden flex-col md:flex-row h-full">
+        <!-- Panel Izquierdo Amarillo -->
+        <div class="md:w-5/12 bg-idatYellow p-8 md:p-12 flex flex-col justify-between relative overflow-hidden h-full flex-shrink-0">
+          <div class="absolute -right-16 -top-16 w-48 h-48 bg-white/10 rounded-full blur-2xl"></div>
+          <div>
+            <span class="bg-idatDark text-idatYellow font-black px-4 py-1.5 rounded-full text-xs tracking-widest uppercase">SESIÓN 15</span>
+            <h1 class="text-4xl md:text-5xl font-black text-idatDark mt-6 leading-tight">CSS Avanzado</h1>
+            <p class="text-idatDark/80 font-medium mt-3 text-sm md:text-base">Pseudo-clases de estado, decoradores con Pseudo-elementos y la fórmula matemática de la Especificidad.</p>
+          </div>
+          <div class="border-t border-idatDark/20 pt-6">
+            <span class="text-xs font-bold uppercase tracking-wider text-idatDark/60 block">Facilitador del curso:</span>
+            <span class="text-xl font-extrabold text-idatDark block mt-1">Ing. Jhon Chavez</span>
+            <span class="text-xs font-semibold bg-idatDark/10 text-idatDark px-2 py-0.5 rounded mt-2 inline-block">IDAT © 2026</span>
+          </div>
+        </div>
+        <!-- Panel Derecho de Información -->
+        <div class="md:w-7/12 p-8 md:p-12 flex flex-col justify-center bg-radial-at-tr from-gray-50 to-white h-full overflow-y-auto">
+          <h2 class="text-2xl md:text-3xl font-bold text-idatDark mb-4">¿Qué dominaremos hoy?</h2>
+          <p class="text-gray-600 mb-8 leading-relaxed text-sm md:text-base">En la Sesión 14 dominamos el Modelo de Caja y los selectores base. Hoy elevamos el nivel aprendiendo a reaccionar a las acciones del usuario, insertar micro-diseño sin ensuciar el HTML y resolver conflictos de estilos mediante el cálculo de especificidad.</p>
+          <div class="grid grid-cols-3 gap-3">
+            <div class="bg-idatLight p-4 rounded-2xl border border-gray-200 flex flex-col justify-between">
+              <span class="text-2xl mb-1 block">🖱️</span>
+              <h3 class="font-bold text-xs md:text-sm text-idatDark">:hover & :focus</h3>
+              <p class="text-[11px] text-idatMuted mt-1">Interactividad nativa y feedback visual.</p>
+            </div>
+            <div class="bg-idatLight p-4 rounded-2xl border border-gray-200 flex flex-col justify-between">
+              <span class="text-2xl mb-1 block">✨</span>
+              <h3 class="font-bold text-xs md:text-sm text-idatDark">::before & ::after</h3>
+              <p class="text-[11px] text-idatMuted mt-1">Generación de contenido virtual con <code>content</code>.</p>
+            </div>
+            <div class="bg-idatLight p-4 rounded-2xl border border-gray-200 flex flex-col justify-between">
+              <span class="text-2xl mb-1 block">⚖️</span>
+              <h3 class="font-bold text-xs md:text-sm text-idatDark">Especificidad</h3>
+              <p class="text-[11px] text-idatMuted mt-1">La balanza de poder: (0, 0, 0, 0) y cascada.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- DIAPOSITIVA 2: Agenda de la Sesión -->
+      <!-- ============================================== -->
+      <div id="slide-2" class="slide w-full bg-white rounded-3xl shadow-xl border border-gray-200 p-8 md:p-12 flex-col justify-between h-full">
+        <div class="flex flex-col justify-between h-full">
+          <div>
+            <div class="flex items-center gap-2 mb-3">
+              <span class="bg-idatYellow text-idatDark font-bold px-2.5 py-0.5 rounded text-xs">RUTA DE APRENDIZAJE</span>
+              <h2 class="text-2xl font-black text-idatDark uppercase tracking-tight">Agenda de la Sesión 15</h2>
+            </div>
+            <p class="text-sm text-idatMuted mb-6">Cuatro ejes técnicos para pasar de maquetadores novatos a diseñadores web con criterio arquitectónico.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="flex gap-4 p-5 rounded-2xl bg-idatLight border-l-4 border-idatYellow items-start">
+                <span class="font-extrabold text-idatYellow text-2xl leading-none">01</span>
+                <div>
+                  <h3 class="font-bold text-sm md:text-base text-idatDark">Pseudo-clases de Estado (:hover, :focus, :active)</h3>
+                  <p class="text-xs text-idatMuted mt-1">Cómo crear componentes responsivos al mouse, teclado y accesibilidad de formularios.</p>
+                </div>
+              </div>
+              <div class="flex gap-4 p-5 rounded-2xl bg-idatLight border-l-4 border-idatDark items-start">
+                <span class="font-extrabold text-idatDark text-2xl leading-none">02</span>
+                <div>
+                  <h3 class="font-bold text-sm md:text-base text-idatDark">Pseudo-elementos (::before y ::after)</h3>
+                  <p class="text-xs text-idatMuted mt-1">Inyección de iconos, adornos, viñetas y efectos sin agregar etiquetas vacías al HTML.</p>
+                </div>
+              </div>
+              <div class="flex gap-4 p-5 rounded-2xl bg-idatLight border-l-4 border-idatYellow items-start">
+                <span class="font-extrabold text-idatYellow text-2xl leading-none">03</span>
+                <div>
+                  <h3 class="font-bold text-sm md:text-base text-idatDark">Cálculo de Especificidad y Prioridades</h3>
+                  <p class="text-xs text-idatMuted mt-1">El sistema numérico (Inline, IDs, Clases, Etiquetas) y por qué <code>!important</code> es el último recurso.</p>
+                </div>
+              </div>
+              <div class="flex gap-4 p-5 rounded-2xl bg-idatLight border-l-4 border-idatDark items-start">
+                <span class="font-extrabold text-idatDark text-2xl leading-none">04</span>
+                <div>
+                  <h3 class="font-bold text-sm md:text-base text-idatDark">Taller Práctico Integrador (Sesiones 14 + 15)</h3>
+                  <p class="text-xs text-idatMuted mt-1">Laboratorio guiado: creación de una tarjeta de producto interactiva con banner virtual y estados.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center text-xs text-idatMuted flex-shrink-0">
+            <span>Bloque 2 · Estilización Profesional CSS</span>
+            <span class="font-semibold text-idatDark">IDAT - Desarrollo Web 2026</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- DIAPOSITIVA 3: Pseudo-clases de Estado -->
+      <!-- ============================================== -->
+      <div id="slide-3" class="slide w-full bg-white rounded-3xl shadow-xl border border-gray-200 p-8 md:p-12 flex-col justify-between h-full">
+        <div class="flex flex-col justify-between h-full">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-2">
+                <span class="bg-idatYellow text-idatDark font-bold px-2.5 py-0.5 rounded text-xs">TEMA 1</span>
+                <h2 class="text-2xl font-black text-idatDark uppercase tracking-tight">Pseudo-clases de Estado (:hover, :focus, :active)</h2>
+              </div>
+              <span class="text-xs text-idatMuted font-bold uppercase">Sintaxis: un solo dos puntos ( : )</span>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch mt-3">
+              <div class="md:col-span-5 flex flex-col justify-center pr-2">
+                <p class="text-sm md:text-base text-gray-600 leading-relaxed mb-4">
+                  Una <strong>pseudo-clase</strong> selecciona un elemento solo cuando se encuentra en un <em>estado dinámico temporal</em> provocado por la interacción del usuario.
+                </p>
+                <div class="space-y-2.5 text-xs md:text-sm text-idatDark font-medium">
+                  <div class="p-3 bg-idatLight rounded-xl border-l-4 border-idatYellow">
+                    <strong>:hover:</strong> Se activa cuando el puntero del mouse se sitúa encima del elemento. Indispensable para botones, enlaces y tarjetas.
+                  </div>
+                  <div class="p-3 bg-idatLight rounded-xl border-l-4 border-blue-500">
+                    <strong>:focus:</strong> Se activa cuando un elemento recibe el foco interactivo (clic en un <code>&lt;input&gt;</code> o navegación con tecla <kbd class="px-1.5 py-0.5 bg-white border border-gray-300 rounded font-mono text-[10px]">Tab</kbd>). <em>¡Clave para accesibilidad!</em>
+                  </div>
+                  <div class="p-3 bg-idatLight rounded-xl border-l-4 border-green-500">
+                    <strong>:active:</strong> Se activa en el instante milimétrico que el usuario mantiene presionado el botón del mouse.
+                  </div>
+                </div>
+              </div>
+
+              <div class="md:col-span-7 bg-idatDark text-gray-100 rounded-2xl p-6 font-mono text-xs md:text-sm overflow-auto custom-scrollbar shadow-inner relative flex flex-col justify-center min-h-[240px]">
+                <div class="absolute right-3 top-3 text-[10px] text-gray-400 bg-gray-800 px-2 py-0.5 rounded font-sans uppercase">Código CSS</div>
+                <div class="space-y-2">
+                  <div class="text-gray-400">/* Estado normal */</div>
+                  <div><span class="text-yellow-400 font-bold">.btn-contacto</span> {</div>
+                  <div class="pl-6 text-green-400">background-color: #111827;</div>
+                  <div class="pl-6 text-green-400">color: #ffffff;</div>
+                  <div class="pl-6 text-blue-400">transition: all 0.25s ease; <span class="text-gray-500">/* Suaviza el cambio */</span></div>
+                  <div>}</div>
+                  <div class="text-gray-400 pt-2">/* Estado hover (mouse encima) */</div>
+                  <div><span class="text-yellow-400 font-bold">.btn-contacto:hover</span> {</div>
+                  <div class="pl-6 text-green-400">background-color: #FFC820;</div>
+                  <div class="pl-6 text-green-400">color: #111827;</div>
+                  <div>}</div>
+                  <div class="text-gray-400 pt-2">/* Estado focus (cursor activo en campo) */</div>
+                  <div><span class="text-yellow-400 font-bold">input:focus</span> {</div>
+                  <div class="pl-6 text-green-400">outline: 3px solid #FFC820;</div>
+                  <div>}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="text-xs text-idatMuted border-t border-gray-100 pt-3 flex justify-between flex-shrink-0">
+            <span>Regla de Oro: Nunca elimines el outline con `outline: none` sin proveer un `:focus` visible alternativo.</span>
+            <span>WCAG 2.2 Accesibilidad</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- DIAPOSITIVA 4: Ejemplo 1 - Demostración Hover & Focus -->
+      <!-- ============================================== -->
+      <div id="slide-4" class="slide w-full bg-white rounded-3xl shadow-xl border border-gray-200 p-8 md:p-12 flex-col justify-between h-full">
+        <div class="flex flex-col h-full justify-between">
+          <div class="flex items-center justify-between mb-4 flex-shrink-0">
+            <div class="flex items-center gap-2">
+              <span class="bg-idatYellow text-idatDark font-bold px-2.5 py-0.5 rounded text-xs">EJEMPLO 1</span>
+              <h2 class="text-xl font-black text-idatDark uppercase tracking-tight">Interacción en Vivo: :hover y :focus</h2>
+            </div>
+            <button onclick="toggleExample('example-css-1')" class="text-xs bg-idatDark text-white px-4 py-1.5 rounded-full font-bold hover:bg-idatYellow hover:text-idatDark transition-colors">
+              💻 Ver Código / Vista Previa
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch flex-1 min-h-0 my-2">
+            <!-- Columna Izquierda: Explicación -->
+            <div class="text-sm flex flex-col justify-between">
+              <div>
+                <p class="text-idatMuted leading-relaxed mb-4 text-sm md:text-base">
+                  Prueba la interactividad en el panel de la derecha. Observa cómo cambia la apariencia al interactuar con el mouse o al usar la tecla <kbd class="px-1.5 py-0.5 bg-gray-200 rounded font-mono text-xs">Tab</kbd>.
+                </p>
+                <div class="space-y-3">
+                  <div class="bg-yellow-50 border border-idatYellow/40 p-3 rounded-xl text-xs">
+                    <strong class="text-idatDark block mb-1">Botón con :hover y :active:</strong>
+                    Pasa el cursor por el botón: cambia de fondo negro a amarillo IDAT. Al hacer clic sostenido, se encoge suavemente con <code>transform: scale(0.96)</code>.
+                  </div>
+                  <div class="bg-blue-50 border border-blue-200 p-3 rounded-xl text-xs">
+                    <strong class="text-blue-900 block mb-1">Campo de Texto con :focus:</strong>
+                    Haz clic en el input. El borde se ilumina y genera un anillo dorado de realce sin alterar el tamaño de la caja (evitando saltos CLS).
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Columna Derecha: Contenedor interactivo -->
+            <div class="border border-gray-200 rounded-2xl overflow-hidden shadow-sm flex flex-col bg-white h-full min-h-[340px] md:h-auto">
+              <div class="bg-gray-100 px-4 py-2 flex justify-between items-center border-b border-gray-200">
+                <span id="label-css-1" class="text-xs font-bold text-idatDark">Vista Previa Interactiva</span>
+                <span class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
+              </div>
+              
+              <div class="p-6 flex-1 overflow-auto custom-scrollbar flex items-center justify-center bg-gray-50/50">
+                <!-- VISTA PREVIA -->
+                <div id="preview-css-1" class="w-full max-w-sm space-y-4">
+                  <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm space-y-4">
+                    <div>
+                      <label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="demo-email">Correo Estudiante</label>
+                      <input type="email" id="demo-email" placeholder="ejemplo@idat.edu.pe" 
+                             class="demo-input-focus w-full px-3 py-2 text-sm border-2 border-gray-300 rounded-xl bg-gray-50 transition-all duration-200">
+                      <span class="text-[10px] text-gray-400 mt-1 block">💡 Haz clic para activar el estado <code>:focus</code></span>
+                    </div>
+
+                    <div class="pt-2">
+                      <button class="w-full py-2.5 px-4 bg-idatDark text-idatYellow font-black text-xs uppercase tracking-wider rounded-xl transition-all duration-200 hover:bg-idatYellow hover:text-idatDark active:scale-95 shadow-md">
+                        Iniciar Sesión IDAT
+                      </button>
+                      <span class="text-[10px] text-gray-400 mt-1 block text-center">👆 Pasa el cursor para ver <code>:hover</code> y presiona para <code>:active</code></span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- CÓDIGO HTML/CSS -->
+                <div id="code-css-1" class="hidden w-full h-full font-mono text-xs text-yellow-400 bg-idatDark p-4 rounded-xl overflow-auto custom-scrollbar">
+                  <pre><span class="text-gray-400">/* Input en reposo */</span>
+<span class="text-blue-400">input</span> {
+  <span class="text-green-400">border: 2px solid #D1D5DB;</span>
+  <span class="text-green-400">border-radius: 12px;</span>
+  <span class="text-green-400">transition: all 0.2s ease;</span>
+}
+
+<span class="text-gray-400">/* Input enfocado (teclado o clic) */</span>
+<span class="text-blue-400">input:focus</span> {
+  <span class="text-green-400">outline: none;</span>
+  <span class="text-green-400">border-color: #FFC820;</span>
+  <span class="text-green-400">box-shadow: 0 0 0 3px rgba(255, 200, 32, 0.35);</span>
+}
+
+<span class="text-gray-400">/* Botón y sus estados */</span>
+<span class="text-blue-400">.btn-login</span> {
+  <span class="text-green-400">background-color: #111827;</span>
+  <span class="text-green-400">color: #FFC820;</span>
+  <span class="text-green-400">transition: all 0.2s ease;</span>
+}
+
+<span class="text-blue-400">.btn-login:hover</span> {
+  <span class="text-green-400">background-color: #FFC820;</span>
+  <span class="text-green-400">color: #111827;</span>
+}
+
+<span class="text-blue-400">.btn-login:active</span> {
+  <span class="text-green-400">transform: scale(0.96);</span>
+}</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- DIAPOSITIVA 5: Pseudo-elementos (::before y ::after) -->
+      <!-- ============================================== -->
+      <div id="slide-5" class="slide w-full bg-white rounded-3xl shadow-xl border border-gray-200 p-8 md:p-12 flex-col justify-between h-full">
+        <div class="flex flex-col justify-between h-full">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-2">
+                <span class="bg-idatYellow text-idatDark font-bold px-2.5 py-0.5 rounded text-xs">TEMA 2</span>
+                <h2 class="text-2xl font-black text-idatDark uppercase tracking-tight">Pseudo-elementos (::before y ::after)</h2>
+              </div>
+              <span class="text-xs text-idatMuted font-bold uppercase">Sintaxis: dos dobles puntos ( :: )</span>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch mt-3">
+              <div class="md:col-span-5 flex flex-col justify-center pr-2">
+                <p class="text-sm md:text-base text-gray-600 leading-relaxed mb-3">
+                  Un <strong>pseudo-elemento</strong> crea un elemento virtual decorativo en el árbol de renderizado del navegador <em>sin necesidad de escribir etiquetas adicionales en el HTML</em>.
+                </p>
+                <div class="space-y-2 text-xs md:text-sm text-idatDark font-medium">
+                  <div class="p-2.5 bg-idatLight rounded-xl border-l-4 border-idatYellow">
+                    <strong>::before:</strong> Inserta un hijo virtual <em>inmediatamente antes</em> del contenido real del elemento.
+                  </div>
+                  <div class="p-2.5 bg-idatLight rounded-xl border-l-4 border-idatDark">
+                    <strong>::after:</strong> Inserta un hijo virtual <em>inmediatamente después</em> del contenido real del elemento.
+                  </div>
+                  <div class="p-2.5 bg-red-50 border-l-4 border-red-500 rounded-xl text-red-900">
+                    <strong>⚠️ La regla sagrada:</strong> Es <strong>100% obligatorio</strong> incluir la propiedad <code>content: "";</code>. Si no declaras <code>content</code>, el pseudo-elemento no existirá en pantalla.
+                  </div>
+                </div>
+              </div>
+
+              <div class="md:col-span-7 bg-idatDark text-gray-100 rounded-2xl p-6 font-mono text-xs md:text-sm overflow-auto custom-scrollbar shadow-inner relative flex flex-col justify-center min-h-[240px]">
+                <div class="absolute right-3 top-3 text-[10px] text-gray-400 bg-gray-800 px-2 py-0.5 rounded font-sans uppercase">Sintaxis Oficial CSS3</div>
+                <div class="space-y-2">
+                  <div class="text-gray-400">/* Agrega icono antes del título */</div>
+                  <div><span class="text-yellow-400 font-bold">.titulo-seccion::before</span> {</div>
+                  <div class="pl-6 text-green-400">content: "📌 "; <span class="text-gray-500">/* ¡Propiedad obligatoria! */</span></div>
+                  <div>}</div>
+                  
+                  <div class="text-gray-400 pt-2">/* Inserta una etiqueta decorativa después */</div>
+                  <div><span class="text-yellow-400 font-bold">.producto-nuevo::after</span> {</div>
+                  <div class="pl-6 text-green-400">content: "TOP VENTAS";</div>
+                  <div class="pl-6 text-green-400">font-size: 10px;</div>
+                  <div class="pl-6 text-green-400">background-color: #FFC820;</div>
+                  <div class="pl-6 text-green-400">color: #111827;</div>
+                  <div class="pl-6 text-green-400">padding: 2px 6px;</div>
+                  <div class="pl-6 text-green-400">border-radius: 4px;</div>
+                  <div class="pl-6 text-green-400">margin-left: 8px;</div>
+                  <div>}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="text-xs text-idatMuted border-t border-gray-100 pt-3 flex justify-between flex-shrink-0">
+            <span>Diferencia clave: Pseudo-clase (:hover) = estado | Pseudo-elemento (::after) = elemento cosmético virtual.</span>
+            <span>Estándares W3C</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- DIAPOSITIVA 6: Ejemplo 2 - Decoración con ::before y ::after -->
+      <!-- ============================================== -->
+      <div id="slide-6" class="slide w-full bg-white rounded-3xl shadow-xl border border-gray-200 p-8 md:p-12 flex-col justify-between h-full">
+        <div class="flex flex-col h-full justify-between">
+          <div class="flex items-center justify-between mb-4 flex-shrink-0">
+            <div class="flex items-center gap-2">
+              <span class="bg-idatYellow text-idatDark font-bold px-2.5 py-0.5 rounded text-xs">EJEMPLO 2</span>
+              <h2 class="text-xl font-black text-idatDark uppercase tracking-tight">Efectos Visuales con ::before y ::after</h2>
+            </div>
+            <button onclick="toggleExample('example-css-2')" class="text-xs bg-idatDark text-white px-4 py-1.5 rounded-full font-bold hover:bg-idatYellow hover:text-idatDark transition-colors">
+              💻 Ver Código / Vista Previa
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch flex-1 min-h-0 my-2">
+            <!-- Columna Izquierda: Explicación -->
+            <div class="text-sm flex flex-col justify-between">
+              <div>
+                <p class="text-idatMuted leading-relaxed mb-4 text-sm md:text-base">
+                  Mira el panel derecho: el HTML contiene únicamente texto plano, pero CSS inyecta insignias, viñetas doradas y barras laterales automáticamente.
+                </p>
+                <div class="space-y-3">
+                  <div class="bg-idatLight p-3 rounded-xl border-l-4 border-idatYellow text-xs">
+                    <strong class="text-idatDark block mb-1">Cinta lateral con ::before:</strong>
+                    Se crea un rectángulo vertical absoluto con <code>content: ''</code> y fondo <code>#FFC820</code> sin tocar el marcado HTML.
+                  </div>
+                  <div class="bg-idatLight p-3 rounded-xl border-l-4 border-emerald-500 text-xs">
+                    <strong class="text-emerald-900 block mb-1">Insignia automática con ::after:</strong>
+                    Añade un distintivo verde " [NUEVO]" a cualquier producto que tenga la clase <code>.destacado</code>.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Columna Derecha: Contenedor interactivo -->
+            <div class="border border-gray-200 rounded-2xl overflow-hidden shadow-sm flex flex-col bg-white h-full min-h-[340px] md:h-auto">
+              <div class="bg-gray-100 px-4 py-2 flex justify-between items-center border-b border-gray-200">
+                <span id="label-css-2" class="text-xs font-bold text-idatDark">Vista Previa Interactiva</span>
+                <span class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
+              </div>
+              
+              <div class="p-6 flex-1 overflow-auto custom-scrollbar flex items-center justify-center bg-gray-50/50">
+                <!-- VISTA PREVIA -->
+                <div id="preview-css-2" class="w-full max-w-sm space-y-3">
+                  <!-- Tarjeta 1 con Ribbon ::before -->
+                  <div class="demo-ribbon bg-white p-4 pl-5 rounded-xl border border-gray-200 shadow-sm">
+                    <h4 class="text-xs font-black uppercase text-gray-400">Curso Virtual</h4>
+                    <p class="font-extrabold text-sm text-idatDark">Desarrollo Frontend con HTML & CSS</p>
+                    <span class="text-[11px] text-gray-500 mt-1 block">La barra amarilla lateral fue creada con <code>::before</code></span>
+                  </div>
+
+                  <!-- Elemento con Badge ::before y ::after -->
+                  <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+                    <p class="demo-badge font-bold text-sm text-idatDark">
+                      Café Geisha Cusco
+                    </p>
+                    <p class="text-xs text-gray-500 mt-1">
+                      La estrella inicial (★) y la etiqueta final ([NUEVO]) provienen de CSS puro.
+                    </p>
+                  </div>
+                </div>
+
+                <!-- CÓDIGO HTML/CSS -->
+                <div id="code-css-2" class="hidden w-full h-full font-mono text-xs text-yellow-400 bg-idatDark p-4 rounded-xl overflow-auto custom-scrollbar">
+                  <pre><span class="text-gray-400">&lt;!-- HTML Limpio (sin etiquetas basura) --&gt;</span>
+&lt;<span class="text-blue-400">p</span> <span class="text-green-400">class</span>="<span class="text-white">producto</span>"&gt;Café Geisha Cusco&lt;/<span class="text-blue-400">p</span>&gt;
+
+<span class="text-gray-400">/* CSS con Pseudo-elementos */</span>
+<span class="text-blue-400">.producto::before</span> {
+  <span class="text-green-400">content: "★ ";</span>
+  <span class="text-green-400">color: #FFC820;</span>
+  <span class="text-green-400">font-weight: 900;</span>
+}
+
+<span class="text-blue-400">.producto::after</span> {
+  <span class="text-green-400">content: " [NUEVO]";</span>
+  <span class="text-green-400">color: #10B981;</span>
+  <span class="text-green-400">font-size: 10px;</span>
+  <span class="text-green-400">font-weight: 800;</span>
+}</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- DIAPOSITIVA 7: Cálculo de Especificidad y Prioridades -->
+      <!-- ============================================== -->
+      <div id="slide-7" class="slide w-full bg-white rounded-3xl shadow-xl border border-gray-200 p-8 md:p-12 flex-col justify-between h-full">
+        <div class="flex flex-col justify-between h-full">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-2">
+                <span class="bg-idatYellow text-idatDark font-bold px-2.5 py-0.5 rounded text-xs">TEMA 3</span>
+                <h2 class="text-2xl font-black text-idatDark uppercase tracking-tight">Cálculo de Especificidad y Prioridades</h2>
+              </div>
+              <span class="text-xs text-idatMuted font-bold uppercase">La Balanza: (Inline, ID, Clase, Etiqueta)</span>
+            </div>
+            
+            <p class="text-xs md:text-sm text-gray-600 mb-3">
+              ¿Qué ocurre cuando dos reglas CSS intentan pintar el mismo elemento con colores distintos? El navegador calcula un <strong>vector de peso (A, B, C, D)</strong>:
+            </p>
+
+            <!-- Tabla de Ponderación de Especificidad -->
+            <div class="grid grid-cols-4 gap-3 text-center my-3">
+              <div class="bg-red-50 border-2 border-red-300 p-3 rounded-2xl">
+                <span class="text-xs font-black text-red-600 block uppercase">1000 Pts</span>
+                <strong class="text-sm block mt-1 text-idatDark">Estilos Inline</strong>
+                <code class="text-[10px] text-gray-600 font-mono mt-1 block">style="..."</code>
+              </div>
+              <div class="bg-yellow-50 border-2 border-yellow-400 p-3 rounded-2xl">
+                <span class="text-xs font-black text-yellow-700 block uppercase">100 Pts</span>
+                <strong class="text-sm block mt-1 text-idatDark">IDs</strong>
+                <code class="text-[10px] text-gray-600 font-mono mt-1 block">#menu-principal</code>
+              </div>
+              <div class="bg-blue-50 border-2 border-blue-300 p-3 rounded-2xl">
+                <span class="text-xs font-black text-blue-700 block uppercase">10 Pts</span>
+                <strong class="text-sm block mt-1 text-idatDark">Clases / :hover</strong>
+                <code class="text-[10px] text-gray-600 font-mono mt-1 block">.card, :focus</code>
+              </div>
+              <div class="bg-gray-50 border-2 border-gray-300 p-3 rounded-2xl">
+                <span class="text-xs font-black text-gray-600 block uppercase">1 Pto</span>
+                <strong class="text-sm block mt-1 text-idatDark">Etiquetas / ::before</strong>
+                <code class="text-[10px] text-gray-600 font-mono mt-1 block">p, h1, div</code>
+              </div>
+            </div>
+
+            <!-- Ejemplos Comparativos de Puntuación -->
+            <div class="bg-idatDark text-gray-100 p-4 rounded-2xl font-mono text-xs space-y-2 mt-2">
+              <div class="flex justify-between items-center border-b border-gray-800 pb-1.5">
+                <span><code>p</code> <span class="text-gray-500">(1 etiqueta)</span></span>
+                <span class="text-gray-400 font-bold">Peso: 0, 0, 0, 1 = 1 pt</span>
+              </div>
+              <div class="flex justify-between items-center border-b border-gray-800 pb-1.5">
+                <span><code>.btn.activo</code> <span class="text-gray-500">(2 clases)</span></span>
+                <span class="text-yellow-400 font-bold">Peso: 0, 0, 2, 0 = 20 pts</span>
+              </div>
+              <div class="flex justify-between items-center border-b border-gray-800 pb-1.5">
+                <span><code>#header .nav li a:hover</code> <span class="text-gray-500">(1 ID + 2 Clases/Pseudo + 2 Etiquetas)</span></span>
+                <span class="text-green-400 font-bold">Peso: 0, 1, 2, 2 = 122 pts ⭐ GANA</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="text-xs text-idatMuted border-t border-gray-100 pt-2 flex justify-between flex-shrink-0">
+            <span>⚠️ !important rompe la cascada natural: úsalo solo para resolver emergencias extremas.</span>
+            <span>Regla de Desempate: A igual peso, gana la regla escrita más abajo en el archivo CSS.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- DIAPOSITIVA 8: Taller Práctico Integrador (Sesiones 14 y 15) -->
+      <!-- ============================================== -->
+      <div id="slide-8" class="slide w-full bg-white rounded-3xl shadow-xl border border-gray-200 p-8 md:p-12 flex-col justify-between h-full">
+        <div class="flex flex-col h-full justify-between">
+          <div class="flex items-center justify-between mb-4 flex-shrink-0">
+            <div class="flex items-center gap-2">
+              <span class="bg-idatYellow text-idatDark font-bold px-2.5 py-0.5 rounded text-xs">LABORATORIO EN VIVO</span>
+              <h2 class="text-xl font-black text-idatDark uppercase tracking-tight">Taller Integrador: Tarjeta Interactiva con CSS Puro</h2>
+            </div>
+            <button onclick="toggleExample('example-css-workshop')" class="text-xs bg-idatDark text-white px-4 py-1.5 rounded-full font-bold hover:bg-idatYellow hover:text-idatDark transition-colors">
+              💻 Ver Solución en Código
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch flex-1 min-h-0 my-2">
+            <!-- Instrucciones del Taller -->
+            <div class="text-sm flex flex-col justify-between">
+              <div>
+                <p class="text-idatMuted leading-relaxed mb-3 text-sm">
+                  Construye una ficha de producto integrando los conceptos de la <strong>Sesión 14</strong> (Box Model, bordes, tipografía) y la <strong>Sesión 15</strong> (Pseudo-clases y Pseudo-elementos):
+                </p>
+                <div class="space-y-2 text-xs">
+                  <div class="p-2.5 bg-gray-50 rounded-xl border-l-4 border-idatDark">
+                    <strong>Paso 1 (Box Model):</strong> Aplica <code>padding: 24px</code>, <code>border-radius: 20px</code> y sombra suave al contenedor.
+                  </div>
+                  <div class="p-2.5 bg-gray-50 rounded-xl border-l-4 border-idatYellow">
+                    <strong>Paso 2 (Pseudo-elemento ::before):</strong> Agrega una franja dorada superior decorativa en la cabecera con <code>content: ''</code> y altura <code>6px</code>.
+                  </div>
+                  <div class="p-2.5 bg-gray-50 rounded-xl border-l-4 border-blue-500">
+                    <strong>Paso 3 (Pseudo-clase :hover):</strong> Al pasar el mouse, la tarjeta debe elevarse sutilmente con <code>transform: translateY(-4px)</code> y cambiar de sombra.
+                  </div>
+                  <div class="p-2.5 bg-gray-50 rounded-xl border-l-4 border-green-500">
+                    <strong>Paso 4 (Pseudo-clase :focus):</strong> El botón de compra debe encender un anillo dorado visible al recibir foco con teclado.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel de Resultados del Laboratorio -->
+            <div class="border border-gray-200 rounded-2xl overflow-hidden shadow-sm flex flex-col bg-white h-full min-h-[340px] md:h-auto">
+              <div class="bg-gray-100 px-4 py-2 flex justify-between items-center border-b border-gray-200">
+                <span id="label-css-workshop" class="text-xs font-bold text-idatDark">Resultado en Vivo del Taller</span>
+                <span class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
+              </div>
+              
+              <div class="p-6 flex-1 overflow-auto custom-scrollbar flex items-center justify-center bg-gray-50/50">
+                <!-- VISTA PREVIA DEL PRODUCTO -->
+                <div id="preview-css-workshop" class="w-full max-w-xs">
+                  <div class="relative bg-white p-6 rounded-2xl border border-gray-200 shadow-md hover:-translate-y-1.5 transition-all duration-300 overflow-hidden group">
+                    <!-- Franja superior inyectada con efecto ::before simulado -->
+                    <div class="absolute top-0 left-0 right-0 h-1.5 bg-idatYellow"></div>
+                    
+                    <span class="text-[10px] font-black tracking-widest text-idatYellow uppercase bg-idatDark px-2 py-0.5 rounded">CAFÉ DE ESPECIALIDAD</span>
+                    <h3 class="text-lg font-black text-idatDark mt-2">Geisha San Fernando</h3>
+                    <p class="text-xs text-idatMuted mt-1">Notas florales a jazmín y durazno. Finca Santa Teresa, Cusco (1,850 msnm).</p>
+                    
+                    <div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
+                      <span class="text-lg font-extrabold text-idatDark">S/ 52.00</span>
+                      <button class="px-4 py-2 bg-idatDark text-idatYellow font-bold text-xs rounded-xl hover:bg-idatYellow hover:text-idatDark demo-input-focus transition-all duration-200 shadow">
+                        Añadir
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- CÓDIGO DE LA SOLUCIÓN DEL TALLER -->
+                <div id="code-css-workshop" class="hidden w-full h-full font-mono text-xs text-yellow-400 bg-idatDark p-4 rounded-xl overflow-auto custom-scrollbar">
+                  <pre><span class="text-gray-400">/* Solución Oficial: Taller Sesiones 14 + 15 */</span>
+
+<span class="text-blue-400">.card-producto</span> {
+  <span class="text-green-400">background-color: #FFFFFF;</span>
+  <span class="text-green-400">padding: 24px;</span>
+  <span class="text-green-400">border-radius: 20px;</span>
+  <span class="text-green-400">position: relative;</span>
+  <span class="text-green-400">transition: transform 0.3s ease, box-shadow 0.3s ease;</span>
+}
+
+<span class="text-gray-500">/* Pseudo-elemento: barra superior decorativa */</span>
+<span class="text-blue-400">.card-producto::before</span> {
+  <span class="text-green-400">content: "";</span>
+  <span class="text-green-400">position: absolute;</span>
+  <span class="text-green-400">top: 0; left: 0; right: 0;</span>
+  <span class="text-green-400">height: 6px;</span>
+  <span class="text-green-400">background-color: #FFC820;</span>
+}
+
+<span class="text-gray-500">/* Pseudo-clase :hover: elevación dinámica */</span>
+<span class="text-blue-400">.card-producto:hover</span> {
+  <span class="text-green-400">transform: translateY(-6px);</span>
+  <span class="text-green-400">box-shadow: 0 12px 24px rgba(0,0,0,0.12);</span>
+}
+
+<span class="text-gray-500">/* Pseudo-clase :focus: accesibilidad de teclado */</span>
+<span class="text-blue-400">.btn-comprar:focus</span> {
+  <span class="text-green-400">outline: 3px solid #FFC820;</span>
+}</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- DIAPOSITIVA 9: Cierre de Sesión / Agradecimiento -->
+      <!-- ============================================== -->
+      <div id="slide-9" class="slide w-full bg-idatDark rounded-3xl shadow-xl border border-gray-900 p-8 md:p-12 flex-col justify-between h-full text-white">
+        <div class="flex flex-col items-center justify-center text-center my-auto">
+          <div class="bg-idatYellow text-idatDark font-black px-6 py-2 rounded-full text-xs md:text-sm tracking-widest uppercase mb-6 animate-bounce">
+            ¡SESIÓN 15 CUMPLIDA!
+          </div>
+          <h2 class="text-4xl md:text-5xl font-black tracking-tight text-white leading-tight">
+            Muchas Gracias por <br class="hidden md:block">su Atención
+          </h2>
+          <p class="text-gray-400 mt-4 max-w-xl text-sm md:text-base leading-relaxed">
+            Ya dominas las transiciones con <code>:hover</code> y <code>:focus</code>, sabes decorar sin ensuciar el HTML con <code>::before</code> y <code>::after</code>, y comprendes la balanza de la especificidad.
+          </p>
+          
+          <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl">
+            <div class="bg-gray-800/80 p-5 rounded-2xl border border-gray-700 text-left">
+              <span class="text-idatYellow text-xs font-bold uppercase block tracking-wider mb-1.5">REPASO DE HOY</span>
+              <p class="text-xs md:text-sm text-gray-300">Pseudo-clases de estado interactivo, pseudo-elementos con la propiedad obligatoria <code>content</code> y la fórmula de especificidad (0, 0, 0, 0).</p>
+            </div>
+            <div class="bg-gray-800/80 p-5 rounded-2xl border border-gray-700 text-left">
+              <span class="text-idatYellow text-xs font-bold uppercase block tracking-wider mb-1.5">PRÓXIMA CLASE: SESIÓN 16</span>
+              <p class="text-xs md:text-sm text-gray-300">Profundizaremos en el <strong>Box-sizing: border-box</strong>, tipos de visualización (<code>block</code>, <code>inline</code>, <code>inline-block</code>) y unidades relativas (<code>rem</code>, <code>em</code>, <code>%</code>).</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-6 pt-4 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500 w-full gap-2 flex-shrink-0">
+          <span>Ing. Jhon Chavez • <span class="text-idatYellow">Selectores Avanzados & Especificidad</span></span>
+          <span>© 2026 IDAT. Todos los derechos reservados.</span>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer de Navegación e Indicadores (Altura Fija) -->
+  <footer class="bg-white border-t border-gray-200 px-6 md:px-12 py-3 flex flex-col md:flex-row items-center justify-between gap-4 h-auto md:h-[72px] flex-shrink-0 z-50">
+    <!-- Paginación Izquierda -->
+    <div class="flex items-center gap-3">
+      <span class="text-xs text-idatMuted font-bold tracking-wider uppercase">Progreso actual:</span>
+      <div class="flex items-center gap-1.5 bg-idatLight border border-gray-200 rounded-full px-3 py-1 text-xs font-black text-idatDark">
+        <span id="current-slide-num">1</span> / <span id="total-slides-num">9</span>
+      </div>
+    </div>
+
+    <!-- Controles Centrales de Navegación -->
+    <div class="flex items-center gap-2">
+      <button id="btn-prev" onclick="changeSlide(-1)" class="bg-idatDark hover:bg-idatYellow hover:text-idatDark text-white p-2.5 rounded-full transition-all duration-200 shadow disabled:opacity-30 disabled:pointer-events-none" title="Diapositiva Anterior">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+      </button>
+      
+      <!-- Indicadores circulares individuales -->
+      <div class="flex items-center gap-1.5 px-2" id="dots-container"></div>
+
+      <button id="btn-next" onclick="changeSlide(1)" class="bg-idatDark hover:bg-idatYellow hover:text-idatDark text-white p-2.5 rounded-full transition-all duration-200 shadow disabled:opacity-30 disabled:pointer-events-none" title="Siguiente Diapositiva">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+
+    <!-- Indicador Técnico Derecha (Atajos) -->
+    <div class="hidden lg:flex items-center gap-2 text-xs text-idatMuted">
+      <span class="font-bold">Atajos del teclado:</span>
+      <kbd class="px-2 py-0.5 bg-gray-100 border border-gray-300 rounded text-idatDark font-mono font-bold shadow-sm">←</kbd>
+      <kbd class="px-2 py-0.5 bg-gray-100 border border-gray-300 rounded text-idatDark font-mono font-bold shadow-sm">→</kbd>
+    </div>
+  </footer>
+
+  <script>
+    let currentSlide = 1;
+    const totalSlides = 9;
+
+    function initDots() {
+      const container = document.getElementById('dots-container');
+      container.innerHTML = '';
+      for (let i = 1; i <= totalSlides; i++) {
+        const dot = document.createElement('button');
+        dot.className = `w-2.5 h-2.5 rounded-full transition-all duration-300 ${i === 1 ? 'bg-idatYellow ring-2 ring-idatDark w-4' : 'bg-gray-300 hover:bg-gray-400'}`;
+        dot.title = `Ir a Diapositiva ${i}`;
+        dot.onclick = () => jumpToSlide(i);
+        container.appendChild(dot);
+      }
+    }
+
+    function jumpToSlide(num) {
+      if (num < 1 || num > totalSlides) return;
+      
+      document.getElementById(`slide-${currentSlide}`).classList.remove('active');
+      document.getElementById(`slide-${currentSlide}`).classList.add('hidden');
+      
+      currentSlide = num;
+      document.getElementById(`slide-${currentSlide}`).classList.remove('hidden');
+      document.getElementById(`slide-${currentSlide}`).classList.add('active');
+      
+      updateUI();
+    }
+
+    function changeSlide(direction) {
+      const target = currentSlide + direction;
+      jumpToSlide(target);
+    }
+
+    function updateUI() {
+      document.getElementById('current-slide-num').innerText = currentSlide;
+      document.getElementById('total-slides-num').innerText = totalSlides;
+
+      document.getElementById('btn-prev').disabled = currentSlide === 1;
+      document.getElementById('btn-next').disabled = currentSlide === totalSlides;
+
+      const dots = document.getElementById('dots-container').children;
+      for (let i = 0; i < dots.length; i++) {
+        const index = i + 1;
+        if (index === currentSlide) {
+          dots[i].className = 'w-4 h-2.5 rounded-full transition-all duration-300 bg-idatYellow ring-2 ring-idatDark';
+        } else {
+          dots[i].className = 'w-2.5 h-2.5 rounded-full transition-all duration-300 bg-gray-300 hover:bg-gray-400';
+        }
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'Space') {
+        changeSlide(1);
+      } else if (e.key === 'ArrowLeft') {
+        changeSlide(-1);
+      }
+    });
+
+    // Toggle Código vs Vista Previa para los ejemplos interactivos
+    function toggleExample(id) {
+      let previewEl, codeEl, labelEl;
+      
+      if (id === 'example-css-1') {
+        previewEl = document.getElementById('preview-css-1');
+        codeEl = document.getElementById('code-css-1');
+        labelEl = document.getElementById('label-css-1');
+      } else if (id === 'example-css-2') {
+        previewEl = document.getElementById('preview-css-2');
+        codeEl = document.getElementById('code-css-2');
+        labelEl = document.getElementById('label-css-2');
+      } else if (id === 'example-css-workshop') {
+        previewEl = document.getElementById('preview-css-workshop');
+        codeEl = document.getElementById('code-css-workshop');
+        labelEl = document.getElementById('label-css-workshop');
+      }
+
+      if (previewEl.classList.contains('hidden')) {
+        previewEl.classList.remove('hidden');
+        codeEl.classList.add('hidden');
+        labelEl.innerText = "Vista Previa Interactiva";
+      } else {
+        previewEl.classList.add('hidden');
+        codeEl.classList.remove('hidden');
+        labelEl.innerText = "Código HTML / Reglas CSS";
+      }
+    }
+
+    window.onload = function() {
+      initDots();
+      updateUI();
+    };
+  </script>
+</body>
+</html>
